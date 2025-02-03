@@ -1,23 +1,44 @@
-const express = require('express');
-const morgan = require('morgan');
-
+const express = require("express");
 const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const logger = require("morgan");
+const cors = require("cors");
+const bodyParser = require('body-parser');
+const port = process.env.PORT || 3000;
 
-// Configura morgan para registrar las peticiones
-app.use(morgan('dev')); // "dev" muestra los logs en la consola
+/*
+* RUTAS
+*/
+const login = require('./routes/loginRoutes');
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.send('¡Hola, mundo!');
+app.set("port", port);
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use(logger("dev"));
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
+app.use(cors());
+
+app.disable("x-powered-by");
+
+server.listen(port, function () {
+  console.log("Aplicacion de NodeJS en el puerto " + port + " Iniciando...");
 });
 
-// Otras rutas
-app.get('/productos', (req, res) => {
-  res.json({ productos: ['producto1', 'producto2', 'producto3'] });
-});
+/*
+* LLAMANDO A LA RUTAS
+*/
+login(app)
 
-// Iniciar el servidor
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+
+// ERROR HANDLER
+app.use((err, req, res, next) => {
+  console.log(err);
+  res.status(err.status || 500).send(err.stack);
 });
