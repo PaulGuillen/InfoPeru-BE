@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 /*
 * RUTAS
 */
-const login = require('./routes/loginRoutes');
+const auth = require('./routes/authRoutes');
 
 app.set("port", port);
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -34,7 +34,7 @@ server.listen(port, function () {
 /*
 * LLAMANDO A LA RUTAS
 */
-login(app)
+auth(app)
 
 
 // ERROR HANDLER
