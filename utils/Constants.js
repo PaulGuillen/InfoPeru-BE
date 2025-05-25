@@ -7,6 +7,7 @@ module.exports = {
 
   EXTERNAL_APIS: {
     DOLLAR_QUOTE: process.env.DOLLAR_QUOTE_URL,
+    UIT: process.env.UIT_URL,
   },
   HEADERS: {
     USER_AGENT: process.env.USER_AGENT,
