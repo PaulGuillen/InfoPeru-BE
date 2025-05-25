@@ -1,5 +1,14 @@
+require("dotenv").config();
+
 module.exports = {
-    EMAILJS_USER_ID: "3zxyMJU8u4520tnNw", // Obtén este valor de tu cuenta de EmailJS
-    EMAILJS_SERVICE_ID: "service_095cbsr", // Obtén este valor de tu cuenta de EmailJS
-    EMAILJS_TEMPLATE_ID: "template_3ghjlon" // Obtén este valor de tu cuenta de EmailJS
-  };
+  EMAILJS_USER_ID: process.env.EMAILJS_USER_ID,
+  EMAILJS_SERVICE_ID: process.env.EMAILJS_SERVICE_ID,
+  EMAILJS_TEMPLATE_ID: process.env.EMAILJS_TEMPLATE_ID,
+
+  EXTERNAL_APIS: {
+    DOLLAR_QUOTE: process.env.DOLLAR_QUOTE_URL,
+  },
+  HEADERS: {
+    USER_AGENT: process.env.USER_AGENT,
+  },
+};

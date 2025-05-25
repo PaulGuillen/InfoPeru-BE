@@ -1,14 +1,8 @@
-const admin = require("firebase-admin");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const serviceAccount = require("../google_services_firebase.json");
 const emailjs = require("emailjs-com");
+const EMAILJS = require("../utils/Constants");
+const { auth, db } = require("../utils/firebase");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-const auth = admin.auth();
-const db = admin.firestore();
 const EMAILJS_USER_ID = EMAILJS.EMAILJS_USER_ID;
 const EMAILJS_SERVICE_ID = EMAILJS.EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = EMAILJS.EMAILJS_TEMPLATE_ID;

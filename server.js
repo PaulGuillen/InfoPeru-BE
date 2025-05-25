@@ -6,11 +6,7 @@ const logger = require("morgan");
 const cors = require("cors");
 const bodyParser = require('body-parser');
 const port = process.env.PORT || 3000;
-
-/*
-* RUTAS
-*/
-const auth = require('./routes/authRoutes');
+const routes = require("./routes");
 
 app.set("port", port);
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -31,11 +27,9 @@ server.listen(port, function () {
   console.log("Aplicacion de NodeJS en el puerto " + port + " Iniciando...");
 });
 
-/*
-* LLAMANDO A LA RUTAS
-*/
-auth(app)
 
+// Cargar todas las rutas centralizadas
+routes(app);
 
 // ERROR HANDLER
 app.use((err, req, res, next) => {
