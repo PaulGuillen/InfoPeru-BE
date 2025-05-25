@@ -1,6 +1,6 @@
 const axios = require("axios");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const { EXTERNAL_APIS, HEADERS } = require("../utils/Constants");
+const { EXTERNAL_APIS, HEADERS } = require("../utils/constants");
 
 const { auth, db } = require("../utils/firebase");
 
