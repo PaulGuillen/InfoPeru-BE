@@ -12,4 +12,6 @@ module.exports = {
   HEADERS: {
     USER_AGENT: process.env.USER_AGENT,
   },
+
+  COLLECTION_GRATITUDE: process.env.COLLECTION_GRATITUDE,
 };

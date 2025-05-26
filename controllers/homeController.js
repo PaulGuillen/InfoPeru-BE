@@ -1,6 +1,6 @@
 const axios = require("axios");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const { EXTERNAL_APIS, HEADERS } = require("../utils/constants");
+const { EXTERNAL_APIS, HEADERS, COLLECTION_GRATITUDE } = require("../utils/constants");
 
 const { auth, db } = require("../utils/firebase");
 
@@ -52,7 +52,31 @@ const getUit = async (req, res) => {
   }
 };
 
+const getGratitude = async (req, res) => {
+  try {
+    const snapshot = await db.collection(COLLECTION_GRATITUDE).get();
+
+    const gratitudeList = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_CODES.OK,
+      message: "Lista de gratitudes obtenida correctamente",
+      data: gratitudeList,
+    });
+  } catch (error) {
+    console.error("Error al obtener gratitudes:", error.message);
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+      status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      message: "Error al obtener la lista de gratitudes",
+    });
+  }
+}
+
 module.exports = {
   getDollarQuote,
   getUit,
+  getGratitude,
 };
