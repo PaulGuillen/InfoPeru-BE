@@ -14,4 +14,5 @@ module.exports = {
   },
 
   COLLECTION_GRATITUDE: process.env.COLLECTION_GRATITUDE,
+  COLLECTION_SECTION: process.env.COLLECTION_SECTION,
 };

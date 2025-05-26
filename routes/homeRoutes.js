@@ -7,5 +7,5 @@ module.exports = (app) => {
 
   app.get("/home/gratitude", HomeController.getGratitude);
 
-  // app.get("/users/sections", HomeController.register);
+  app.get("/home/sections", HomeController.getSections);
 };
