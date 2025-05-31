@@ -1,0 +1,5 @@
+const NewsController = require("../controllers/newsController.js");
+
+module.exports = (app) => {
+  app.get("/news/countries", NewsController.getCountries);
+};
