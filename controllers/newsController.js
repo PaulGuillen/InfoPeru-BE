@@ -1,6 +1,7 @@
 const axios = require("axios");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
 const { EXTERNAL_APIS, COLLECTION_COUNTRIES } = require("../utils/constants");
+const Util = require("../utils/util");
 const xml2js = require("xml2js");
 const { db } = require("../utils/firebase");
 
@@ -48,7 +49,6 @@ const getGoogle = async (req, res) => {
   try {
     const query = req.query.q || "";
     const hl = req.query.hl || "es";
-
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = parseInt(req.query.perPage, 10) || 10;
 
@@ -72,27 +72,36 @@ const getGoogle = async (req, res) => {
         : [parsed.rss.channel.item];
     }
 
-    const allItems = itemsRaw.map((itm) => ({
-      title: itm.title || "",
-      link: itm.link || "",
-      description: itm.description || "",
-      pubDate: itm.pubDate || "",
-      source: itm.source
-        ? {
-            url: itm.source?.$?.url || "",
-            name: itm.source._ || "",
-          }
-        : null,
-      guid: itm.guid || null,
-    }));
+    const allItems = itemsRaw.map((itm) => {
+      const rawDate = itm.pubDate || "";
+      return {
+        title: itm.title || "",
+        link: itm.link || "",
+        description: itm.description || "",
+        pubDate:  Util.formatPubDate(rawDate),
+        rawDate,
+        source: itm.source
+          ? {
+              url: itm.source?.$?.url || "",
+              name: itm.source._ || "",
+            }
+          : null,
+        guid: itm.guid || null,
+      };
+    });
 
-    const totalItems = allItems.length;
+    const sortedItems = allItems.sort((a, b) => {
+      const dateA = new Date(a.rawDate);
+      const dateB = new Date(b.rawDate);
+      return dateB - dateA;
+    });
+
+    const totalItems = sortedItems.length;
     const totalPages = Math.ceil(totalItems / perPage);
     const currentPage = page > totalPages ? totalPages : page;
-
     const startIndex = (currentPage - 1) * perPage;
     const endIndex = startIndex + perPage;
-    const paginatedItems = allItems.slice(startIndex, endIndex);
+    const paginatedItems = sortedItems.slice(startIndex, endIndex).map(({ rawDate, ...rest }) => rest); // eliminamos rawDate del output
 
     return res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_CODES.OK,
@@ -100,9 +109,9 @@ const getGoogle = async (req, res) => {
       data: {
         items: paginatedItems,
         totalItems,
-        totalPages, 
-        currentPage, 
-        perPage, 
+        totalPages,
+        currentPage,
+        perPage,
       },
     });
   } catch (error) {
