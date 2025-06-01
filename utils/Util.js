@@ -41,6 +41,31 @@ const Util = {
       return dateStr;
     }
   },
+
+  formatSeenDate(seenDateStr) {
+    try {
+      if (!seenDateStr || seenDateStr.length < 15) return seenDateStr;
+
+      const year = seenDateStr.slice(0, 4);
+      const month = seenDateStr.slice(4, 6);
+      const day = seenDateStr.slice(6, 8);
+      const hour = seenDateStr.slice(9, 11);
+      const minute = seenDateStr.slice(11, 13);
+
+      return `${year}-${month}-${day} ${hour}:${minute}`;
+    } catch (err) {
+      console.error("Error formateando seenDate:", err);
+      return seenDateStr;
+    }
+  },
+
+  sortBySeenDateDesc(articles) {
+    return articles.sort((a, b) => {
+      const dateA = new Date(a.seenDate.replace("T", "").replace("Z", ""));
+      const dateB = new Date(b.seenDate.replace("T", "").replace("Z", ""));
+      return dateB - dateA;
+    });
+  },
 };
 
 module.exports = Util;

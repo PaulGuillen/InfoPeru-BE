@@ -9,6 +9,7 @@ module.exports = {
     DOLLAR_QUOTE: process.env.DOLLAR_QUOTE_URL,
     UIT: process.env.UIT_URL,
     GOOGLE_NEWS: process.env.GOOGLE_NEWS_URL,
+    GDELT_PROJECT: process.env.GDELT_PROJECT_URL,
   },
   HEADERS: {
     USER_AGENT: process.env.USER_AGENT,

@@ -78,7 +78,7 @@ const getGoogle = async (req, res) => {
         title: itm.title || "",
         link: itm.link || "",
         description: itm.description || "",
-        pubDate:  Util.formatPubDate(rawDate),
+        pubDate: Util.formatPubDate(rawDate),
         rawDate,
         source: itm.source
           ? {
@@ -101,7 +101,9 @@ const getGoogle = async (req, res) => {
     const currentPage = page > totalPages ? totalPages : page;
     const startIndex = (currentPage - 1) * perPage;
     const endIndex = startIndex + perPage;
-    const paginatedItems = sortedItems.slice(startIndex, endIndex).map(({ rawDate, ...rest }) => rest); // eliminamos rawDate del output
+    const paginatedItems = sortedItems
+      .slice(startIndex, endIndex)
+      .map(({ rawDate, ...rest }) => rest); // eliminamos rawDate del output
 
     return res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_CODES.OK,
@@ -123,7 +125,62 @@ const getGoogle = async (req, res) => {
   }
 };
 
+ const getGDELT = async (req, res) => {
+  try {
+    const query = req.query.q || "";
+    const mode = req.query.mode || "ArtList";
+    const format = req.query.format || "json";
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 10;
+
+    const response = await axios.get(EXTERNAL_APIS.GDELT_PROJECT, {
+      params: { query, mode, format },
+    });
+
+    const articles = response.data.articles || [];
+
+    const mappedArticles = articles.map((article) => ({
+      url: article.url || "",
+      urlMobile: article.url_mobile || "",
+      title: article.title || "",
+      seenDate: Util.formatSeenDate(article.seendate || ""),
+      socialImage: article.socialimage || "",
+      domain: article.domain || "",
+      language: article.language || "",
+      sourceCountry: article.sourcecountry || "",
+    }));
+
+    const sortedArticles = Util.sortBySeenDateDesc(mappedArticles);
+
+    const totalItems = sortedArticles.length;
+    const totalPages = Math.ceil(totalItems / perPage);
+    const currentPage = Math.min(page, totalPages);
+    const startIndex = (currentPage - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    const paginatedItems = sortedArticles.slice(startIndex, endIndex);
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_CODES.OK,
+      message: "Noticias GDELT obtenidas exitosamente",
+      data: {
+        items: paginatedItems,
+        totalItems,
+        totalPages,
+        currentPage,
+        perPage,
+      },
+    });
+  } catch (error) {
+    console.error("Error al obtener noticias de GDELT:", error.message);
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+      status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      message: "Error al obtener noticias de GDELT",
+    });
+  }
+};
+
 module.exports = {
   getCountries,
   getGoogle,
+  getGDELT,
 };

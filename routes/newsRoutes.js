@@ -4,4 +4,6 @@ module.exports = (app) => {
   app.get("/news/countries", NewsController.getCountries);
 
   app.get("/news/google", NewsController.getGoogle);
+
+  app.get("/news/gdelt", NewsController.getGDELT);
 };
