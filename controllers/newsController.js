@@ -1,9 +1,14 @@
 const axios = require("axios");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const { EXTERNAL_APIS, COLLECTION_COUNTRIES } = require("../utils/constants");
+const {
+  EXTERNAL_APIS,
+  COLLECTION_COUNTRIES,
+  HEADERS,
+} = require("../utils/Constants");
 const Util = require("../utils/util");
 const xml2js = require("xml2js");
 const { db } = require("../utils/firebase");
+const RedditResponse = require("../models/RedditResponse");
 
 const getCountries = async (_, res) => {
   try {
@@ -125,7 +130,7 @@ const getGoogle = async (req, res) => {
   }
 };
 
- const getGDELT = async (req, res) => {
+const getGDELT = async (req, res) => {
   try {
     const query = req.query.q || "";
     const mode = req.query.mode || "ArtList";
@@ -179,8 +184,55 @@ const getGoogle = async (req, res) => {
   }
 };
 
+const getRedditNews = async (req, res) => {
+  try {
+    const country = req.query.country || "worldnews";
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 10;
+
+    const url = `${EXTERNAL_APIS.REDDIT_BASE_URL}/r/${country}/new.json`;
+
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": HEADERS.REDDIT_USER_AGENT,
+      },
+    });
+
+    const redditResponse = new RedditResponse(response.data);
+    const allPosts = redditResponse.data.children;
+
+    const sortedPosts = allPosts.sort((a, b) => b.createdUtc - a.createdUtc);
+
+    const totalItems = sortedPosts.length;
+    const totalPages = Math.ceil(totalItems / perPage);
+    const currentPage = Math.min(page, totalPages);
+    const startIndex = (currentPage - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    const paginatedItems = sortedPosts.slice(startIndex, endIndex);
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_CODES.OK,
+      message: "Noticias de Reddit obtenidas exitosamente",
+      data: {
+        items: paginatedItems,
+        totalItems,
+        totalPages,
+        currentPage,
+        perPage,
+      },
+    });
+  } catch (error) {
+    console.error("Error al obtener noticias de Reddit:", error);
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+      status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      message: "Error al obtener noticias de Reddit",
+    });
+  }
+};
+
 module.exports = {
   getCountries,
   getGoogle,
   getGDELT,
+  getRedditNews,
 };

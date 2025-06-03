@@ -66,6 +66,17 @@ const Util = {
       return dateB - dateA;
     });
   },
+
+   formatFromUnix(timestamp) {
+    try {
+      const date = new Date(timestamp * 1000);
+      const pad = (n) => (n < 10 ? '0' + n : n);
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    } catch (err) {
+      console.error("Error formateando timestamp:", err);
+      return "";
+    }
+  },
 };
 
 module.exports = Util;

@@ -10,9 +10,12 @@ module.exports = {
     UIT: process.env.UIT_URL,
     GOOGLE_NEWS: process.env.GOOGLE_NEWS_URL,
     GDELT_PROJECT: process.env.GDELT_PROJECT_URL,
+    REDDIT_BASE_URL: process.env.REDDIT_BASE_URL,
+
   },
   HEADERS: {
     USER_AGENT: process.env.USER_AGENT,
+    REDDIT_USER_AGENT: process.env.REDDIT_USER_AGENT,
   },
 
   COLLECTION_GRATITUDE: process.env.COLLECTION_GRATITUDE,
