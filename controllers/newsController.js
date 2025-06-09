@@ -108,11 +108,11 @@ const getGoogle = async (req, res) => {
     const endIndex = startIndex + perPage;
     const paginatedItems = sortedItems
       .slice(startIndex, endIndex)
-      .map(({ rawDate, ...rest }) => rest); // eliminamos rawDate del output
+      .map(({ rawDate, ...rest }) => rest);
 
     return res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_CODES.OK,
-      message: "Noticias de Google obtenidas exitosamente",
+      message: "Noticias de Google",
       data: {
         items: paginatedItems,
         totalItems,
@@ -166,7 +166,7 @@ const getGDELT = async (req, res) => {
 
     return res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_CODES.OK,
-      message: "Noticias GDELT obtenidas exitosamente",
+      message: "Noticias GDELT",
       data: {
         items: paginatedItems,
         totalItems,
@@ -212,7 +212,7 @@ const getRedditNews = async (req, res) => {
 
     return res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_CODES.OK,
-      message: "Noticias de Reddit obtenidas exitosamente",
+      message: "Noticias de Reddit",
       data: {
         items: paginatedItems,
         totalItems,

@@ -31,9 +31,9 @@ const Util = {
       if (isNaN(originalFormat)) return dateStr;
 
       const pad = (n) => (n < 10 ? "0" + n : n);
-      return `${originalFormat.getFullYear()}-${pad(
+      return `${pad(originalFormat.getDate())}-${pad(
         originalFormat.getMonth() + 1
-      )}-${pad(originalFormat.getDate())} ${pad(
+      )}-${originalFormat.getFullYear()} ${pad(
         originalFormat.getHours()
       )}:${pad(originalFormat.getMinutes())}`;
     } catch (err) {
@@ -52,7 +52,7 @@ const Util = {
       const hour = seenDateStr.slice(9, 11);
       const minute = seenDateStr.slice(11, 13);
 
-      return `${year}-${month}-${day} ${hour}:${minute}`;
+      return `${day}-${month}-${year} ${hour}:${minute}`;
     } catch (err) {
       console.error("Error formateando seenDate:", err);
       return seenDateStr;
@@ -67,11 +67,15 @@ const Util = {
     });
   },
 
-   formatFromUnix(timestamp) {
+  formatFromUnix(timestamp) {
     try {
       const date = new Date(timestamp * 1000);
-      const pad = (n) => (n < 10 ? '0' + n : n);
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      const pad = (n) => (n < 10 ? "0" + n : n);
+      return `${pad(date.getDate())}-${pad(
+        date.getMonth() + 1
+      )}-${date.getFullYear()} ${pad(date.getHours())}:${pad(
+        date.getMinutes()
+      )}`;
     } catch (err) {
       console.error("Error formateando timestamp:", err);
       return "";
