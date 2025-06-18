@@ -4,7 +4,7 @@ const {
   EXTERNAL_APIS,
   COLLECTION_COUNTRIES,
   HEADERS,
-} = require("../utils/constants");
+} = require("../utils/constants.js");
 const Util = require("../utils/util");
 const xml2js = require("xml2js");
 const { db } = require("../utils/firebase");

@@ -1,6 +1,6 @@
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
 const emailjs = require("emailjs-com");
-const EMAILJS = require("../utils/constants");
+const EMAILJS = require("../utils/constants.js");
 const { auth, db } = require("../utils/firebase");
 
 const EMAILJS_USER_ID = EMAILJS.EMAILJS_USER_ID;

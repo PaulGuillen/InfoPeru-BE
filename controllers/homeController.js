@@ -6,7 +6,7 @@ const {
   COLLECTION_GRATITUDE,
   COLLECTION_SECTION,
   COLLECTION_HOME_IMAGES,
-} = require("../utils/constants");
+} = require("../utils/constants.js");
 
 const { db } = require("../utils/firebase");
 
