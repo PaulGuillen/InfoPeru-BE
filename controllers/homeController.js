@@ -118,9 +118,11 @@ const getGratitude = async (_, res) => {
 
 const getSections = async (_, res) => {
   try {
-    const snapshot = await db.collection(COLLECTION_SECTION).get();
+    const [snapshot] = await Promise.all([
+      db.collection(COLLECTION_SECTION).get(),
+    ]);
 
-    const gratitudeList = snapshot.docs.map((doc) => ({
+    const sectionList = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
     }));
@@ -128,7 +130,7 @@ const getSections = async (_, res) => {
     return res.status(HTTP_STATUS_CODES.OK).json({
       status: HTTP_STATUS_CODES.OK,
       message: "Lista de secciones obtenida correctamente",
-      data: gratitudeList,
+      data: sectionList,
     });
   } catch (error) {
     console.error("Error al obtener secciones:", error.message);
