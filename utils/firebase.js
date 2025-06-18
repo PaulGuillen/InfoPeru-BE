@@ -11,7 +11,7 @@ const {
   FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
   FIREBASE_CLIENT_X509_CERT_URL,
   FIREBASE_UNIVERSE_DOMAIN,
-} = require("../utils/Constants");
+} = require("../utils/constants");
 
 const serviceAccount = {
   type: FIREBASE_TYPE,
