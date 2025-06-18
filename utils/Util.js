@@ -81,6 +81,31 @@ const Util = {
       return "";
     }
   },
+
+  cleanDescription(htmlString = "") {
+    try {
+      const decoded = htmlString
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, " ");
+
+      const matches = [...decoded.matchAll(/>([^<>]+)</g)];
+      if (matches && matches.length > 0) {
+        return matches
+          .map((m) => m[1].trim())
+          .filter(Boolean)
+          .join(" • ");
+      }
+
+      return decoded.trim();
+    } catch (e) {
+      console.error("Error cleaning description:", e);
+      return htmlString;
+    }
+  },
 };
 
 module.exports = Util;

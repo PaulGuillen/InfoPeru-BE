@@ -82,7 +82,7 @@ const getGoogle = async (req, res) => {
       return {
         title: itm.title || "",
         link: itm.link || "",
-        description: itm.description || "",
+        description:(Util.cleanDescription(itm.description) || "") + " ...Leer más?",
         pubDate: Util.formatPubDate(rawDate),
         rawDate,
         source: itm.source

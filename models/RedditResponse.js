@@ -13,9 +13,7 @@ function MediaMetaData(data = {}) {
     status: data.status || "",
     e: data.e || "",
     m: data.m || "",
-    p: Array.isArray(data.p)
-      ? data.p.map((p) => ImageResolution(p))
-      : [],
+    p: Array.isArray(data.p) ? data.p.map((p) => ImageResolution(p)) : [],
     s: data.s ? ImageResolution(data.s) : null,
     id: data.id || "",
   };
@@ -35,7 +33,10 @@ function PostData(data = {}) {
     title: data.title || "",
     author: data.author || "",
     subreddit: data.subreddit || "",
-    selfText: data.selftext || "",
+    selfText:
+      (data.selftext && data.selftext.trim().length > 0
+        ? data.selftext
+        : "No hay texto disponible") + " ...Leer más?",
     url: data.url || "",
     thumbnail: data.thumbnail || "",
     createdUtc: data.created_utc || 0,
@@ -67,9 +68,7 @@ function PostData(data = {}) {
     authorFlairTemplateId: data.author_flair_template_id || "",
     isOriginalContent: data.is_original_content || false,
     userReports: data.user_reports || [],
-    secureMedia: data.secure_media
-      ? new MediaEmbed(data.secure_media)
-      : null,
+    secureMedia: data.secure_media ? new MediaEmbed(data.secure_media) : null,
     isRedditMediaDomain: data.is_reddit_media_domain || false,
     isMeta: data.is_meta || false,
     category: data.category || "",
@@ -103,8 +102,8 @@ function PostData(data = {}) {
     pinned: data.pinned || false,
     over18: data.over_18 || false,
     mediaMetadata: data.media_metadata
-          ? MediaMetaData(data.media_metadata)
-          : null,
+      ? MediaMetaData(data.media_metadata)
+      : null,
     allAwardings: data.all_awardings || [],
     awarders: data.awarders || [],
     mediaOnly: data.media_only || false,
