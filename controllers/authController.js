@@ -1,11 +1,6 @@
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
 const emailjs = require("emailjs-com");
-const EMAILJS = require("../utils/constants.js");
 const { auth, db } = require("../utils/firebase");
-
-const EMAILJS_USER_ID = EMAILJS.EMAILJS_USER_ID;
-const EMAILJS_SERVICE_ID = EMAILJS.EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = EMAILJS.EMAILJS_TEMPLATE_ID;
 
 module.exports = {
   async login(req, res, next) {
@@ -121,26 +116,6 @@ module.exports = {
         status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
         message: "Error al enviar el correo de recuperación de contraseña",
       });
-    }
-  },
-
-  async sendEmail(to, resetLink) {
-    const emailParams = {
-      user_email: to,
-      reset_link: resetLink, 
-    };
-
-    try {
-      const response = await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        emailParams,
-        EMAILJS_USER_ID
-      );
-      console.log("Correo enviado exitosamente:", response);
-    } catch (error) {
-      console.error("Error al enviar correo con EmailJS:", error);
-      throw new Error("No se pudo enviar el correo de recuperación.");
     }
   },
 };

@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-module.exports = {
+const Constants = {
   EMAILJS_USER_ID: process.env.EMAILJS_USER_ID,
   EMAILJS_SERVICE_ID: process.env.EMAILJS_SERVICE_ID,
   EMAILJS_TEMPLATE_ID: process.env.EMAILJS_TEMPLATE_ID,
@@ -35,3 +35,5 @@ module.exports = {
   FIREBASE_CLIENT_X509_CERT_URL: process.env.FIREBASE_CLIENT_X509_CERT_URL,
   FIREBASE_UNIVERSE_DOMAIN: process.env.FIREBASE_UNIVERSE_DOMAIN,
 };
+
+module.exports = Constants;

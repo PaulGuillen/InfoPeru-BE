@@ -1,10 +1,6 @@
 const axios = require("axios");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const {
-  EXTERNAL_APIS,
-  COLLECTION_COUNTRIES,
-  HEADERS,
-} = require("../utils/constants.js");
+const Constants = require("../utils/constants");
 const Util = require("../utils/util");
 const xml2js = require("xml2js");
 const { db } = require("../utils/firebase");
@@ -12,7 +8,7 @@ const RedditResponse = require("../models/RedditResponse");
 
 const getCountries = async (_, res) => {
   try {
-    const snapshot = await db.collection(COLLECTION_COUNTRIES).get();
+    const snapshot = await db.collection(Constants.COLLECTION_COUNTRIES).get();
 
     const countries = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -57,7 +53,7 @@ const getGoogle = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = parseInt(req.query.perPage, 10) || 10;
 
-    const response = await axios.get(EXTERNAL_APIS.GOOGLE_NEWS, {
+    const response = await axios.get(Constants.EXTERNAL_APIS.GOOGLE_NEWS, {
       params: { q: query, hl: hl },
       responseType: "text",
     });
@@ -194,7 +190,7 @@ const getRedditNews = async (req, res) => {
 
     const response = await axios.get(url, {
       headers: {
-        "User-Agent": HEADERS.REDDIT_USER_AGENT,
+        "User-Agent": Constants.HEADERS.REDDIT_USER_AGENT,
       },
     });
 
