@@ -10,9 +10,6 @@ const getDollarQuote = async (_, res) => {
       axios.get(process.env.DOLLAR_QUOTE_URL, {
         headers: {
           "User-Agent": process.env.USER_AGENT,
-          "Accept-Encoding": "gzip",
-          Connection: "keep-alive",
-          Host: "deperu.com",
         },
       }),
       db
