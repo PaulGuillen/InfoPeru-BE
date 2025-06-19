@@ -1,14 +1,14 @@
 const axios = require("axios");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const Constants = require("../utils/constants");
 const Util = require("../utils/util");
 const xml2js = require("xml2js");
 const { db } = require("../utils/firebase");
 const RedditResponse = require("../models/RedditResponse");
+require("dotenv").config();
 
 const getCountries = async (_, res) => {
   try {
-    const snapshot = await db.collection(Constants.COLLECTION_COUNTRIES).get();
+    const snapshot = await db.collection(process.env.COLLECTION_COUNTRIES).get();
 
     const countries = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -53,7 +53,7 @@ const getGoogle = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = parseInt(req.query.perPage, 10) || 10;
 
-    const response = await axios.get(Constants.EXTERNAL_APIS.GOOGLE_NEWS, {
+    const response = await axios.get(process.env.GOOGLE_NEWS_URL, {
       params: { q: query, hl: hl },
       responseType: "text",
     });
@@ -134,7 +134,7 @@ const getGDELT = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = parseInt(req.query.perPage, 10) || 10;
 
-    const response = await axios.get(EXTERNAL_APIS.GDELT_PROJECT, {
+    const response = await axios.get(process.env.GDELT_PROJECT_URL, {
       params: { query, mode, format },
     });
 
@@ -186,11 +186,11 @@ const getRedditNews = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = parseInt(req.query.perPage, 10) || 10;
 
-    const url = `${EXTERNAL_APIS.REDDIT_BASE_URL}/r/${country}/new.json`;
+    const url = `${process.env.REDDIT_BASE_URL}/r/${country}/new.json`;
 
     const response = await axios.get(url, {
       headers: {
-        "User-Agent": Constants.HEADERS.REDDIT_USER_AGENT,
+        "User-Agent": process.env.REDDIT_USER_AGENT,
       },
     });
 

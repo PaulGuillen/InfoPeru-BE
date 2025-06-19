@@ -1,18 +1,18 @@
 const axios = require("axios");
 const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const Constants = require("../utils/constants");
 const { db } = require("../utils/firebase");
+require("dotenv").config();
 
 const getDollarQuote = async (_, res) => {
   try {
     
     const [dollarRes, snapshot] = await Promise.all([
-      axios.get(Constants.EXTERNAL_APIS.DOLLAR_QUOTE, {
+      axios.get(process.env.DOLLAR_QUOTE_URL, {
         headers: {
-          "User-Agent": Constants.HEADERS.USER_AGENT,
+          "User-Agent": process.env.USER_AGENT,
         },
       }),
-      db.collection(Constants.COLLECTION_HOME_IMAGES).where("isDollarInfo", "==", true).limit(1).get(),
+      db.collection(process.env.COLLECTION_HOME_IMAGES).where("isDollarInfo", "==", true).limit(1).get(),
     ]);
 
     const dollarData = dollarRes.data;
@@ -48,12 +48,12 @@ const getDollarQuote = async (_, res) => {
 const getUit = async (_, res) => {
   try {
     const [uitRes, snapshot] = await Promise.all([
-      axios.get(Constants.EXTERNAL_APIS.UIT, {
+      axios.get(process.env.UIT_URL, {
         headers: {
-          "User-Agent": HEADERS.USER_AGENT,
+          "User-Agent": process.env.USER_AGENT,
         },
       }),
-      db.collection(Constants.COLLECTION_HOME_IMAGES).where("isUITInfo", "==", true).limit(1).get(),
+      db.collection(process.env.COLLECTION_HOME_IMAGES).where("isUITInfo", "==", true).limit(1).get(),
     ]);
 
     const uitData = uitRes.data;
@@ -88,7 +88,7 @@ const getUit = async (_, res) => {
 
 const getGratitude = async (_, res) => {
   try {
-    const snapshot = await db.collection(Constants.COLLECTION_GRATITUDE).get();
+    const snapshot = await db.collection(process.env.COLLECTION_GRATITUDE).get();
 
     const gratitudeList = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -112,7 +112,7 @@ const getGratitude = async (_, res) => {
 const getSections = async (_, res) => {
   try {
     const [snapshot] = await Promise.all([
-      db.collection(Constants.COLLECTION_SECTION).get(),
+      db.collection(process.env.COLLECTION_SECTION).get(),
     ]);
 
     const sectionList = snapshot.docs.map(doc => ({
