@@ -1,11 +1,8 @@
-const HomeController = require("../controllers/homeController.js");
+import HomeController from "../controllers/homeController.js";
 
-module.exports = (app) => {
+export default (app) => {
   app.get("/home/dollarQuote", HomeController.getDollarQuote);
-
   app.get("/home/uit", HomeController.getUit);
-
   app.get("/home/gratitude", HomeController.getGratitude);
-
   app.get("/home/section", HomeController.getSections);
 };

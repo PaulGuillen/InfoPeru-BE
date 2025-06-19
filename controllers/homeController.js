@@ -1,18 +1,22 @@
-const axios = require("axios");
-const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const { db } = require("../utils/firebase");
-require("dotenv").config();
+import axios from "axios";
+import HTTP_STATUS_CODES from "../utils/httpStatusCodes.js";
+import { db } from "../utils/firebase.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const getDollarQuote = async (_, res) => {
   try {
-    
     const [dollarRes, snapshot] = await Promise.all([
       axios.get(process.env.DOLLAR_QUOTE_URL, {
         headers: {
           "User-Agent": process.env.USER_AGENT,
         },
       }),
-      db.collection(process.env.COLLECTION_HOME_IMAGES).where("isDollarInfo", "==", true).limit(1).get(),
+      db
+        .collection(process.env.COLLECTION_HOME_IMAGES)
+        .where("isDollarInfo", "==", true)
+        .limit(1)
+        .get(),
     ]);
 
     const dollarData = dollarRes.data;
@@ -53,7 +57,11 @@ const getUit = async (_, res) => {
           "User-Agent": process.env.USER_AGENT,
         },
       }),
-      db.collection(process.env.COLLECTION_HOME_IMAGES).where("isUITInfo", "==", true).limit(1).get(),
+      db
+        .collection(process.env.COLLECTION_HOME_IMAGES)
+        .where("isUITInfo", "==", true)
+        .limit(1)
+        .get(),
     ]);
 
     const uitData = uitRes.data;
@@ -115,7 +123,7 @@ const getSections = async (_, res) => {
       db.collection(process.env.COLLECTION_SECTION).get(),
     ]);
 
-    const sectionList = snapshot.docs.map(doc => ({
+    const sectionList = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
@@ -134,7 +142,7 @@ const getSections = async (_, res) => {
   }
 };
 
-module.exports = {
+export default {
   getDollarQuote,
   getUit,
   getGratitude,

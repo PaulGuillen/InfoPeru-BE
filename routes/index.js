@@ -1,8 +1,8 @@
-const homeRoutes = require("./homeRoutes");
-const authRoutes = require("./authRoutes");
-const newsRoutes = require("./newsRoutes");
+import homeRoutes from "./homeRoutes.js";
+import authRoutes from "./authRoutes.js";
+import newsRoutes from "./newsRoutes.js";
 
-module.exports = (app) => {
+export default (app) => {
   authRoutes(app);
   homeRoutes(app);
   newsRoutes(app);

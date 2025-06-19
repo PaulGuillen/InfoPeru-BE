@@ -1,10 +1,6 @@
-const AuthController = require("../controllers/authController.js");
+import AuthController from "../controllers/authController.js"; // ✅ sin '*'
 
-module.exports = (app) => {
-
+export default (app) => {
   app.post("/users/login", AuthController.login);
-
   app.post("/users/register", AuthController.register);
-
-  app.post("/users/recoveryPassword", AuthController.recoveryPassword);
 };

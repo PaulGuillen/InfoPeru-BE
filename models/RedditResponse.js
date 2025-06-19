@@ -1,4 +1,4 @@
-const Util = require("../utils/util");
+import { Util } from "../utils/util.js";
 
 function ImageResolution(data = {}) {
   return {
@@ -153,4 +153,4 @@ function RedditResponse(raw = {}) {
   };
 }
 
-module.exports = RedditResponse;
+export default RedditResponse;

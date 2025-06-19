@@ -1,5 +1,6 @@
-const admin = require("firebase-admin");
-require("dotenv").config();
+import admin from "firebase-admin";
+import dotenv from "dotenv";
+dotenv.config();
 
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,
@@ -11,7 +12,7 @@ const serviceAccount = {
   auth_uri: process.env.FIREBASE_AUTH_URI,
   token_uri: process.env.FIREBASE_TOKEN_URI,
   auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
-  client_x509_cert_url:  process.env.FIREBASE_CLIENT_X509_CERT_URL,
+  client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
   universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN,
 };
 
@@ -24,4 +25,4 @@ if (!admin.apps.length) {
 const auth = admin.auth();
 const db = admin.firestore();
 
-module.exports = { admin, auth, db };
+export { admin, auth, db };

@@ -1,17 +1,18 @@
-const express = require("express");
+import express from "express";
+import http from "http";
+import cors from "cors";
+import bodyParser from "body-parser";
+import routes from "./routes/index.js"; 
+import morgan from "morgan";
+
 const app = express();
-const http = require("http");
 const server = http.createServer(app);
-const logger = require("morgan");
-const cors = require("cors");
-const bodyParser = require('body-parser');
 const port = process.env.PORT || 3000;
-const routes = require("./routes");
 
 app.set("port", port);
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
-app.use(logger("dev"));
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(
   express.urlencoded({

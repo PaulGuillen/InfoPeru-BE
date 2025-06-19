@@ -4,8 +4,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write ."
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",

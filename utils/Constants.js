@@ -1,4 +1,5 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
 const Constants = {
   EMAILJS_USER_ID: process.env.EMAILJS_USER_ID,
@@ -36,4 +37,4 @@ const Constants = {
   FIREBASE_UNIVERSE_DOMAIN: process.env.FIREBASE_UNIVERSE_DOMAIN,
 };
 
-module.exports = Constants;
+export default Constants;

@@ -1,10 +1,11 @@
-const axios = require("axios");
-const HTTP_STATUS_CODES = require("../utils/httpStatusCodes");
-const Util = require("../utils/util");
-const xml2js = require("xml2js");
-const { db } = require("../utils/firebase");
-const RedditResponse = require("../models/RedditResponse");
-require("dotenv").config();
+import axios from "axios";
+import HTTP_STATUS_CODES from "../utils/httpStatusCodes.js";
+import { Util } from "../utils/util.js";
+import xml2js from "xml2js";
+import { db } from "../utils/firebase.js";
+import RedditResponse from "../models/RedditResponse.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const getCountries = async (_, res) => {
   try {
@@ -226,7 +227,7 @@ const getRedditNews = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   getCountries,
   getGoogle,
   getGDELT,
