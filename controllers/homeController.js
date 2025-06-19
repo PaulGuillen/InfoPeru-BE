@@ -41,10 +41,14 @@ const getDollarQuote = async (_, res) => {
       data: enrichedData,
     });
   } catch (error) {
-    console.error("Error al obtener cotización o imagen:", error.message);
-    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-      status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
-      message: "Error al obtener la cotización del dólar",
+    const status = error.response?.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+    const message = error.response?.data?.message || error.message || "Error desconocido";
+
+    console.error("Error al obtener cotización o imagen:", message);
+
+    return res.status(status).json({
+      status,
+      message: `Error al obtener la cotización del dólar: ${message}`,
     });
   }
 };
