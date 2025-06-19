@@ -5,4 +5,5 @@ export default (app) => {
   app.get("/home/uit", HomeController.getUit);
   app.get("/home/gratitude", HomeController.getGratitude);
   app.get("/home/section", HomeController.getSections);
+  app.get("/home/syncDollarQuote", HomeController.getSyncDollarQuote);
 };

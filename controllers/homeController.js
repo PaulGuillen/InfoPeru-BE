@@ -6,12 +6,8 @@ dotenv.config();
 
 const getDollarQuote = async (_, res) => {
   try {
-    const [dollarRes, snapshot] = await Promise.all([
-      axios.get(process.env.DOLLAR_QUOTE_URL, {
-        headers: {
-          "User-Agent": process.env.USER_AGENT,
-        },
-      }),
+    const [quoteSnapshot, imageSnapshot] = await Promise.all([
+      db.collection("dollarQuote").limit(1).get(),
       db
         .collection(process.env.COLLECTION_HOME_IMAGES)
         .where("isDollarInfo", "==", true)
@@ -19,18 +15,34 @@ const getDollarQuote = async (_, res) => {
         .get(),
     ]);
 
-    const dollarData = dollarRes.data;
+    if (quoteSnapshot.empty) {
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+        status: HTTP_STATUS_CODES.NOT_FOUND,
+        message: "No se encontró la cotización del dólar.",
+      });
+    }
+
+    const quoteData = quoteSnapshot.docs[0].data();
 
     let imageUrl = null;
     let iconImage = null;
-    if (!snapshot.empty) {
-      const docData = snapshot.docs[0].data();
-      imageUrl = docData.imageUrl;
-      iconImage = docData.iconImage;
+
+    if (!imageSnapshot.empty) {
+      const imageData = imageSnapshot.docs[0].data();
+      imageUrl = imageData.imageUrl || null;
+      iconImage = imageData.iconImage || null;
     }
 
+    const { Compra, Venta, ...cleanedQuoteData } = quoteData;
+
     const enrichedData = {
-      ...dollarData,
+      ...cleanedQuoteData,
+      Cotizacion: [
+        {
+          Compra: Compra ?? null,
+          Venta: Venta ?? null,
+        },
+      ],
       imageUrl,
       iconImage,
     };
@@ -41,8 +53,10 @@ const getDollarQuote = async (_, res) => {
       data: enrichedData,
     });
   } catch (error) {
-    const status = error.response?.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
-    const message = error.response?.data?.message || error.message || "Error desconocido";
+    const status =
+      error.response?.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+    const message =
+      error.response?.data?.message || error.message || "Error desconocido";
 
     console.error("Error al obtener cotización o imagen:", message);
 
@@ -148,9 +162,52 @@ const getSections = async (_, res) => {
   }
 };
 
+const getSyncDollarQuote = async (_, res) => {
+  try {
+    const response = await axios.get(process.env.DOLLAR_QUOTE_URL, {
+      headers: {
+        "User-Agent": process.env.USER_AGENT,
+      },
+    });
+
+    const data = response.data;
+
+    const quote = {
+      Compra: data?.Cotizacion?.[0]?.Compra || null,
+      Venta: data?.Cotizacion?.[0]?.Venta || null,
+      DolaresxEuro: data?.DolaresxEuro || null,
+      enlace: data?.enlace || "",
+      fecha: data?.fecha || "",
+      importante: data?.importante || "",
+      servicio: data?.servicio || "",
+      sitio: data?.sitio || "",
+    };
+
+    await db.collection("dollarQuote").doc("main").set(quote, { merge: true });
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_CODES.OK,
+      message: "Cotización sincronizada exitosamente",
+      data: quote,
+    });
+  } catch (error) {
+    const status =
+      error.response?.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+    const message =
+      error.response?.data?.message || error.message || "Error desconocido";
+
+    console.error("Error al sincronizar dólar:", message);
+    return res.status(status).json({
+      status,
+      message: `Error al sincronizar dólar: ${message}`,
+    });
+  }
+};
+
 export default {
   getDollarQuote,
   getUit,
   getGratitude,
   getSections,
+  getSyncDollarQuote,
 };
