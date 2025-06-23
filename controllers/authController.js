@@ -28,8 +28,7 @@ async function login(req, res, next) {
 
     return res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
       status: HTTP_STATUS_CODES.BAD_REQUEST,
-      message:
-        "Tipo de inicio de sesión no válido o token de Google faltante",
+      message: "Tipo de inicio de sesión no válido o token de Google faltante",
     });
   } catch (error) {
     console.error("Error en el inicio de sesión:", error);
@@ -41,7 +40,7 @@ async function login(req, res, next) {
 }
 
 async function register(req, res, next) {
-  const { name, lastname, email, password } = req.body;
+  const { name, lastname, phone, birthdate, email, password } = req.body;
 
   try {
     const userRecord = await auth.createUser({
@@ -56,6 +55,8 @@ async function register(req, res, next) {
     const user = {
       uid: uid,
       name: name,
+      phone: phone,
+      birthdate: birthdate,
       lastname: lastname,
       email: email,
       password: password,

@@ -10,7 +10,7 @@ dotenv.config();
 const getCountries = async (_, res) => {
   try {
     const snapshot = await db.collection(process.env.COLLECTION_COUNTRIES).get();
-
+ 
     const countries = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
