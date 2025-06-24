@@ -71,9 +71,16 @@ async function register(req, res, next) {
     });
   } catch (error) {
     console.error("Error al registrar usuario:", error);
+
+    let mensajeError = "Error al registrar usuario";
+
+    if (error.code === "auth/email-already-exists") {
+      mensajeError = "El correo electrónico ya está en uso por otra cuenta.";
+    }
+
     return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
-      message: "Error al registrar usuario",
+      message: mensajeError,
     });
   }
 }
