@@ -40,7 +40,7 @@ async function login(req, res, next) {
 }
 
 async function register(req, res, next) {
-  const { name, lastname, phone, birthdate, email, password } = req.body;
+  const { name, lastname, email, password } = req.body;
 
   try {
     const userRecord = await auth.createUser({
@@ -55,8 +55,6 @@ async function register(req, res, next) {
     const user = {
       uid: uid,
       name: name,
-      phone: phone,
-      birthdate: birthdate,
       lastname: lastname,
       email: email,
       password: password,
