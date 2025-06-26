@@ -28,11 +28,8 @@ server.listen(port, function () {
   console.log("Aplicacion de NodeJS en el puerto " + port + " Iniciando...");
 });
 
-
-// Cargar todas las rutas centralizadas
 routes(app);
 
-// ERROR HANDLER
 app.use((err, req, res, next) => {
   console.log(err);
   res.status(err.status || 500).send(err.stack);

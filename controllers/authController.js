@@ -56,6 +56,8 @@ async function register(req, res, next) {
       uid: uid,
       name: name,
       lastname: lastname,
+      phone: "",
+      birthdate: "",
       email: email,
       password: password,
     };
