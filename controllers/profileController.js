@@ -34,6 +34,37 @@ const getProfileById = async (req, res) => {
   }
 };
 
+const updateProfileById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedData = req.body;
+
+    const docRef = db.collection(process.env.COLLECTION_USERS).doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+        status: HTTP_STATUS_CODES.NOT_FOUND,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    await docRef.update(updatedData);
+
+    return res.status(HTTP_STATUS_CODES.OK).json({
+      status: HTTP_STATUS_CODES.OK,
+      message: "Perfil actualizado correctamente",
+    });
+  } catch (error) {
+    console.error("Error al actualizar perfil:", error);
+    return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+      status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+      message: "Error al actualizar el perfil",
+    });
+  }
+};
+
 export default {
- getProfileById 
+  getProfileById,
+  updateProfileById,
 };
