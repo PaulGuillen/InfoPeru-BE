@@ -24,7 +24,7 @@ app.use(cors());
 
 app.disable("x-powered-by");
 
-server.listen(port, function () {
+server.listen(port, "0.0.0.0", function () {
   console.log("Aplicacion de NodeJS en el puerto " + port + " Iniciando...");
 });
 

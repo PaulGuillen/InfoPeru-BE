@@ -6,8 +6,12 @@ dotenv.config();
 
 const getDollarQuote = async (_, res) => {
   try {
-    const [quoteSnapshot, imageSnapshot] = await Promise.all([
-      db.collection("dollarQuote").limit(1).get(),
+    const [dollarQuoteRes, imageSnapshot] = await Promise.all([
+      axios.get(process.env.DOLLAR_QUOTE_URL, {
+        headers: {
+          "User-Agent": process.env.USER_AGENT,
+        },
+      }),
       db
         .collection(process.env.COLLECTION_HOME_IMAGES)
         .where("isDollarInfo", "==", true)
@@ -15,15 +19,7 @@ const getDollarQuote = async (_, res) => {
         .get(),
     ]);
 
-    if (quoteSnapshot.empty) {
-      return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
-        status: HTTP_STATUS_CODES.NOT_FOUND,
-        message: "No se encontró la cotización del dólar.",
-      });
-    }
-
-    const quoteData = quoteSnapshot.docs[0].data();
-
+    const dollarRes = dollarQuoteRes.data;
     let imageUrl = null;
     let iconImage = null;
 
@@ -33,16 +29,8 @@ const getDollarQuote = async (_, res) => {
       iconImage = imageData.iconImage || null;
     }
 
-    const { Compra, Venta, ...cleanedQuoteData } = quoteData;
-
     const enrichedData = {
-      ...cleanedQuoteData,
-      Cotizacion: [
-        {
-          Compra: Compra ?? null,
-          Venta: Venta ?? null,
-        },
-      ],
+      ...dollarRes,
       imageUrl,
       iconImage,
     };
