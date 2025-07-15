@@ -6,62 +6,96 @@ dotenv.config();
 
 const getDollarQuote = async (_, res) => {
   try {
-    const [dollarQuoteRes, imageSnapshot] = await Promise.all([
-      axios.get("https://deperu.com/api/rest/cotizaciondolar.json", {
-        headers: {
-          "User-Agent": "devpaul",
+    const externalRes = await axios.get(process.env.DOLLAR_QUOTE_URL, {
+      headers: {
+        "User-Agent": process.env.USER_AGENT,
+      },
+      timeout: 5000,
+    });
+
+    const apiData = externalRes.data;
+    const cotizacion = apiData?.Cotizacion?.[0] ?? {};
+
+    await db.collection("dollarQuote").doc("latest").set({
+      ...apiData,
+      Compra: cotizacion.Compra ?? null,
+      Venta: cotizacion.Venta ?? null,
+      updatedAt: new Date(),
+    });
+
+    const imageSnapshot = await db
+      .collection(process.env.COLLECTION_HOME_IMAGES)
+      .where("isDollarInfo", "==", true)
+      .limit(1)
+      .get();
+
+    const imageData = imageSnapshot.empty ? {} : imageSnapshot.docs[0].data();
+
+    const enrichedData = {
+      ...apiData,
+      Cotizacion: [
+        {
+          Compra: cotizacion.Compra ?? null,
+          Venta: cotizacion.Venta ?? null,
         },
-      }),
-      db
+      ],
+      imageUrl: imageData.imageUrl || null,
+      iconImage: imageData.iconImage || null,
+    };
+
+    return res.status(200).json({
+      status: 200,
+      message: "Cotización obtenida exitosamente (live)",
+      data: enrichedData,
+    });
+
+  } catch (error) {
+    console.warn("⚠️ API externa falló, usando backup de Firebase");
+
+    try {
+      const backupDoc = await db.collection("dollarQuote").doc("latest").get();
+      if (!backupDoc.exists) {
+        return res.status(404).json({
+          status: 404,
+          message: "No se encontró cotización de respaldo en Firebase.",
+        });
+      }
+
+      const backupData = backupDoc.data();
+
+      const imageSnapshot = await db
         .collection(process.env.COLLECTION_HOME_IMAGES)
         .where("isDollarInfo", "==", true)
         .limit(1)
-        .get(),
-    ]);
+        .get();
 
-    const dollarRes = dollarQuoteRes.data;
-    let imageUrl = null;
-    let iconImage = null;
+      const imageData = imageSnapshot.empty ? {} : imageSnapshot.docs[0].data();
 
-    if (!imageSnapshot.empty) {
-      const imageData = imageSnapshot.docs[0].data();
-      imageUrl = imageData.imageUrl || null;
-      iconImage = imageData.iconImage || null;
+      const enrichedData = {
+        ...backupData,
+        Cotizacion: [
+          {
+            Compra: backupData.Compra ?? null,
+            Venta: backupData.Venta ?? null,
+          },
+        ],
+        imageUrl: imageData.imageUrl || null,
+        iconImage: imageData.iconImage || null,
+      };
+
+      return res.status(200).json({
+        status: 200,
+        message: "Cotización obtenida desde backup de Firebase",
+        data: enrichedData,
+      });
+
+    } catch (fallbackErr) {
+      console.error("❌ Error al obtener cotización desde backup:", fallbackErr.message);
+      return res.status(503).json({
+        status: 503,
+        message: "No se pudo obtener la cotización del dólar ni desde la API ni desde Firebase.",
+      });
     }
-
-    const enrichedData = {
-      ...dollarRes,
-      imageUrl,
-      iconImage,
-    };
-
-    return res.status(HTTP_STATUS_CODES.OK).json({
-      status: HTTP_STATUS_CODES.OK,
-      message: "Cotización obtenida exitosamente",
-      data: enrichedData,
-    });
-  } catch (error) {
-    const status =
-      error.response?.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
-    const message =
-      error.response?.data?.message || error.message || "Error desconocido";
-
-    console.error("🚨 Error al obtener cotización o imagen:");
-    console.error("🔗 URL:", error.config?.url || "URL desconocida");
-    console.error("📡 Método:", error.config?.method?.toUpperCase());
-    console.error("📄 Headers:", JSON.stringify(error.config?.headers, null, 2));
-    if (error.response) {
-      console.error("❌ Status Code:", error.response.status);
-      console.error("🧾 Response Headers:", JSON.stringify(error.response.headers, null, 2));
-      console.error("📦 Response Body:", JSON.stringify(error.response.data, null, 2));
-    } else {
-      console.error("⚠️ No se recibió respuesta del servidor externo.");
-    }
-
-    return res.status(status).json({
-      status,
-      message: `Error al obtener la cotización del dólar: ${message}`,
-    });
   }
 };
 
