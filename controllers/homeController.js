@@ -46,7 +46,17 @@ const getDollarQuote = async (_, res) => {
     const message =
       error.response?.data?.message || error.message || "Error desconocido";
 
-    console.error("Error al obtener cotización o imagen:", message);
+    console.error("🚨 Error al obtener cotización o imagen:");
+    console.error("🔗 URL:", error.config?.url || "URL desconocida");
+    console.error("📡 Método:", error.config?.method?.toUpperCase());
+    console.error("📄 Headers:", JSON.stringify(error.config?.headers, null, 2));
+    if (error.response) {
+      console.error("❌ Status Code:", error.response.status);
+      console.error("🧾 Response Headers:", JSON.stringify(error.response.headers, null, 2));
+      console.error("📦 Response Body:", JSON.stringify(error.response.data, null, 2));
+    } else {
+      console.error("⚠️ No se recibió respuesta del servidor externo.");
+    }
 
     return res.status(status).json({
       status,
