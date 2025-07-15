@@ -7,9 +7,9 @@ dotenv.config();
 const getDollarQuote = async (_, res) => {
   try {
     const [dollarQuoteRes, imageSnapshot] = await Promise.all([
-      axios.get(process.env.DOLLAR_QUOTE_URL, {
+      axios.get("https://deperu.com/api/rest/cotizaciondolar.json", {
         headers: {
-          "User-Agent": process.env.USER_AGENT,
+          "User-Agent": "devpaul",
         },
       }),
       db
