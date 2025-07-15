@@ -48,7 +48,6 @@ const getDollarQuote = async (_, res) => {
 async function fetchLiveDollarQuote() {
   const externalRes = await axios.get(process.env.DOLLAR_QUOTE_URL, {
     headers: { "User-Agent": process.env.USER_AGENT },
-    timeout: 5000,
   });
 
   const apiData = externalRes.data;
