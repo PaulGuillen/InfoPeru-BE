@@ -6,22 +6,106 @@ dotenv.config();
 
 const getDollarQuote = async (_, res) => {
   try {
-    const externalRes = await axios.get(process.env.DOLLAR_QUOTE_URL, {
-      headers: {
-        "User-Agent": process.env.USER_AGENT,
-      },
-      timeout: 5000,
-    });
+    const data = await fetchLiveDollarQuote();
 
-    const apiData = externalRes.data;
-    const cotizacion = apiData?.Cotizacion?.[0] ?? {};
-
-    await db.collection("dollarQuote").doc("latest").set({
-      ...apiData,
-      Compra: cotizacion.Compra ?? null,
-      Venta: cotizacion.Venta ?? null,
-      updatedAt: new Date(),
+    return res.status(200).json({
+      status: 200,
+      message: "Cotización obtenida exitosamente (live)",
+      data,
     });
+  } catch (liveError) {
+    console.warn("⚠️ API externa falló, intentando obtener backup:", liveError?.message || liveError);
+
+    try {
+      const fallbackData = await fetchDollarQuoteFromBackup();
+
+      if (!fallbackData) {
+        return res.status(503).json({
+          status: 503,
+          message: "No se pudo obtener la cotización ni desde la API ni desde backup.",
+        });
+      }
+
+      return res.status(200).json({
+        status: 200,
+        message: "Cotización obtenida desde backup de Firebase",
+        data: fallbackData,
+      });
+    } catch (backupError) {
+      const errorMessage = backupError?.message || JSON.stringify(backupError);
+
+      console.error("❌ Error al obtener datos desde el backup de Firebase:", errorMessage);
+
+      return res.status(503).json({
+        status: 503,
+        message: "No se pudo obtener la cotización ni desde la API ni desde backup.",
+        error: errorMessage,
+      });
+    }
+  }
+};
+
+async function fetchLiveDollarQuote() {
+  const externalRes = await axios.get(process.env.DOLLAR_QUOTE_URL, {
+    headers: { "User-Agent": process.env.USER_AGENT },
+    timeout: 5000,
+  });
+
+  const apiData = externalRes.data;
+  const cotizacion = apiData?.Cotizacion?.[0] ?? {};
+
+  await db.collection("dollarQuote").doc("latest").set({
+    ...apiData,
+    Compra: cotizacion.Compra ?? 0,
+    Venta: cotizacion.Venta ?? 0,
+    updatedAt: new Date(),
+  });
+
+  const imageSnapshot = await db
+    .collection(process.env.COLLECTION_HOME_IMAGES)
+    .where("isDollarInfo", "==", true)
+    .limit(1)
+    .get();
+
+  const imageData = imageSnapshot.empty ? {} : imageSnapshot.docs[0].data();
+
+  return {
+    ...apiData,
+    Cotizacion: [{ Compra: cotizacion.Compra ?? 0, Venta: cotizacion.Venta ?? 0 }],
+    imageUrl: imageData.imageUrl || null,
+    iconImage: imageData.iconImage || null,
+    source: "live",
+  };
+}
+
+async function fetchDollarQuoteFromBackup() {
+  try {
+    const backupDoc = await db.collection("dollarQuote").doc("latest").get();
+
+    if (!backupDoc.exists) {
+      const emptyData = {
+        Compra: 0,
+        Venta: 0,
+        DolaresxEuro: 0,
+        enlace: "",
+        fecha: "",
+        importante: "",
+        servicio: "",
+        sitio: "",
+        updatedAt: new Date(),
+        source: "empty",
+      };
+
+      await db.collection("dollarQuote").doc("latest").set(emptyData);
+      return {
+        ...emptyData,
+        Cotizacion: [{ Compra: 0, Venta: 0 }],
+        imageUrl: null,
+        iconImage: null,
+      };
+    }
+
+    const backupData = backupDoc.data();
 
     const imageSnapshot = await db
       .collection(process.env.COLLECTION_HOME_IMAGES)
@@ -31,73 +115,20 @@ const getDollarQuote = async (_, res) => {
 
     const imageData = imageSnapshot.empty ? {} : imageSnapshot.docs[0].data();
 
-    const enrichedData = {
-      ...apiData,
+    return {
+      ...backupData,
       Cotizacion: [
-        {
-          Compra: cotizacion.Compra ?? null,
-          Venta: cotizacion.Venta ?? null,
-        },
+        { Compra: backupData.Compra ?? 0, Venta: backupData.Venta ?? 0 }
       ],
       imageUrl: imageData.imageUrl || null,
       iconImage: imageData.iconImage || null,
+      source: "backup",
     };
-
-    return res.status(200).json({
-      status: 200,
-      message: "Cotización obtenida exitosamente (live)",
-      data: enrichedData,
-    });
-
-  } catch (error) {
-    console.warn("⚠️ API externa falló, usando backup de Firebase");
-
-    try {
-      const backupDoc = await db.collection("dollarQuote").doc("latest").get();
-      if (!backupDoc.exists) {
-        return res.status(404).json({
-          status: 404,
-          message: "No se encontró cotización de respaldo en Firebase.",
-        });
-      }
-
-      const backupData = backupDoc.data();
-
-      const imageSnapshot = await db
-        .collection(process.env.COLLECTION_HOME_IMAGES)
-        .where("isDollarInfo", "==", true)
-        .limit(1)
-        .get();
-
-      const imageData = imageSnapshot.empty ? {} : imageSnapshot.docs[0].data();
-
-      const enrichedData = {
-        ...backupData,
-        Cotizacion: [
-          {
-            Compra: backupData.Compra ?? null,
-            Venta: backupData.Venta ?? null,
-          },
-        ],
-        imageUrl: imageData.imageUrl || null,
-        iconImage: imageData.iconImage || null,
-      };
-
-      return res.status(200).json({
-        status: 200,
-        message: "Cotización obtenida desde backup de Firebase",
-        data: enrichedData,
-      });
-
-    } catch (fallbackErr) {
-      console.error("❌ Error al obtener cotización desde backup:", fallbackErr.message);
-      return res.status(503).json({
-        status: 503,
-        message: "No se pudo obtener la cotización del dólar ni desde la API ni desde Firebase.",
-      });
-    }
+  } catch (err) {
+    console.error("❌ Error crítico en backup:", err.message);
+    return null;
   }
-};
+}
 
 const getUit = async (_, res) => {
   try {
