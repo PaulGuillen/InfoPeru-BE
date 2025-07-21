@@ -233,32 +233,37 @@ const getSyncDollarQuote = async (_, res) => {
     });
 
     const data = response.data;
+    const now = new Date();
+
+    const dia = now.getDate().toString().padStart(2, '0');
+    const mes = (now.getMonth() + 1).toString().padStart(2, '0');
+    const fechaActual = `${dia}-${mes}-${now.getFullYear()}`;
 
     const quote = {
-      Compra: data?.Cotizacion?.[0]?.Compra || null,
-      Venta: data?.Cotizacion?.[0]?.Venta || null,
-      DolaresxEuro: data?.DolaresxEuro || null,
-      enlace: data?.enlace || "",
-      fecha: data?.fecha || "",
-      importante: data?.importante || "",
-      servicio: data?.servicio || "",
-      sitio: data?.sitio || "",
+      Compra: data?.Cotizacion?.[0]?.Compra ?? 0,
+      Venta: data?.Cotizacion?.[0]?.Venta ?? 0,
+      DolaresxEuro: data?.DolaresxEuro ?? 0,
+      enlace: data?.enlace ?? "",
+      fecha: fechaActual,
+      importante: data?.importante ?? "",
+      servicio: data?.servicio ?? "",
+      sitio: data?.sitio ?? "",
+      updatedAt: now,
+      source: "manual-sync",
     };
 
-    await db.collection("dollarQuote").doc("main").set(quote, { merge: true });
+    await db.collection("dollarQuote").doc("latest").set(quote, { merge: true });
 
-    return res.status(HTTP_STATUS_CODES.OK).json({
-      status: HTTP_STATUS_CODES.OK,
-      message: "Cotización sincronizada exitosamente",
+    return res.status(200).json({
+      status: 200,
+      message: "Cotización sincronizada manualmente y actualizada en 'latest'",
       data: quote,
     });
   } catch (error) {
-    const status =
-      error.response?.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
-    const message =
-      error.response?.data?.message || error.message || "Error desconocido";
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.message || error.message || "Error desconocido";
 
-    console.error("Error al sincronizar dólar:", message);
+    console.error("❌ Error al sincronizar cotización del dólar:", message);
     return res.status(status).json({
       status,
       message: `Error al sincronizar dólar: ${message}`,

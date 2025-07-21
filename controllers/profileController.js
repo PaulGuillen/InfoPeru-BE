@@ -1,6 +1,7 @@
 import HTTP_STATUS_CODES from "../utils/httpStatusCodes.js";
 import { db } from "../utils/firebase.js";
 import dotenv from "dotenv";
+import { Timestamp } from "firebase-admin/firestore";
 dotenv.config();
 
 const getProfileById = async (req, res) => {
@@ -64,7 +65,81 @@ const updateProfileById = async (req, res) => {
   }
 };
 
+const createPost = async (req, res) => {
+  const postsRef = db.collection(process.env.COLLECTION_POSTS);
+  try {
+    const { userId, name, lastname, image, comment } = req.body;
+
+    const docRef = postsRef.doc();
+    const commentId = docRef.id;
+
+    const newPost = {
+      commentId,
+      userId,
+      name,
+      lastname,
+      image,
+      comment,
+      createdAt: Timestamp.now(),
+      likes: 0,
+    };
+
+    await docRef.set(newPost); 
+
+    res.status(201).json({
+      status: 201,
+      message: "Comentario creado correctamente",
+      commentId: commentId,
+      data: newPost,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: 500, message: "Error al crear el comentario", error });
+  }
+};
+
+const incrementLike = async (req, res) => {
+  const postsRef = db.collection(process.env.COLLECTION_POSTS);
+  const { id } = req.params;
+
+  try {
+    const postRef = postsRef.doc(id);
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(postRef);
+      if (!doc.exists) throw new Error("Comentario no encontrado");
+      const currentLikes = doc.data().likes || 0;
+      t.update(postRef, { likes: currentLikes + 1 });
+    });
+
+    res
+      .status(200)
+      .json({ status: 200, message: "Like agregado correctamente" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: 500, message: "Error al incrementar like", error });
+  }
+};
+
+const getAllPosts = async (_req, res) => {
+  const postsRef = db.collection(process.env.COLLECTION_POSTS);
+  try {
+    const snapshot = await postsRef.orderBy("createdAt", "desc").get();
+    const posts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    res.status(200).json({ status: 200, posts });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: 500, message: "Error al obtener posts", error });
+  }
+};
+
 export default {
   getProfileById,
   updateProfileById,
+  createPost,
+  incrementLike,
+  getAllPosts,
 };
