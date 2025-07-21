@@ -124,15 +124,28 @@ const incrementLike = async (req, res) => {
 
 const getAllPosts = async (_req, res) => {
   const postsRef = db.collection(process.env.COLLECTION_POSTS);
+
   try {
     const snapshot = await postsRef.orderBy("createdAt", "desc").get();
-    const posts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-    res.status(200).json({ status: 200, posts });
+    const posts = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const data = posts.filter((post) => post.toPublic === true);
+
+    res.status(200).json({
+      status: 200,
+      posts,
+      data,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ status: 500, message: "Error al obtener posts", error });
+    res.status(500).json({
+      status: 500,
+      message: "Error al obtener posts",
+      error,
+    });
   }
 };
 
