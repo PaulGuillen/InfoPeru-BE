@@ -65,8 +65,8 @@ const updateProfileById = async (req, res) => {
   }
 };
 
-const createPost = async (req, res) => {
-  const postsRef = db.collection(process.env.COLLECTION_POSTS);
+const createComment = async (req, res) => {
+  const postsRef = db.collection(process.env.COLLECTION_COMMENTS);
   try {
     const { userId, name, lastname, image, comment } = req.body;
 
@@ -84,7 +84,7 @@ const createPost = async (req, res) => {
       likes: 0,
     };
 
-    await docRef.set(newPost); 
+    await docRef.set(newPost);
 
     res.status(201).json({
       status: 201,
@@ -100,33 +100,41 @@ const createPost = async (req, res) => {
 };
 
 const incrementLike = async (req, res) => {
-  const postsRef = db.collection(process.env.COLLECTION_POSTS);
-  const { id } = req.params;
+  const { type, id } = req.params;
+
+  const collectionName =
+    type === "comment"
+      ? process.env.COLLECTION_COMMENTS
+      : process.env.COLLECTION_POSTS;
+
+  const docRef = db.collection(collectionName).doc(id);
 
   try {
-    const postRef = postsRef.doc(id);
     await db.runTransaction(async (t) => {
-      const doc = await t.get(postRef);
-      if (!doc.exists) throw new Error("Comentario no encontrado");
+      const doc = await t.get(docRef);
+      if (!doc.exists) throw new Error("Documento no encontrado");
+
       const currentLikes = doc.data().likes || 0;
-      t.update(postRef, { likes: currentLikes + 1 });
+      t.update(docRef, { likes: currentLikes + 1 });
     });
 
-    res
-      .status(200)
-      .json({ status: 200, message: "Like agregado correctamente" });
+    res.status(200).json({
+      status: 200,
+      message: "Like agregado correctamente",
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ status: 500, message: "Error al incrementar like", error });
+    res.status(500).json({
+      status: 500,
+      message: "Error al incrementar like" + error.message,
+    });
   }
 };
 
-const getAllPosts = async (_req, res) => {
+const getPosts = async (_req, res) => {
   const postsRef = db.collection(process.env.COLLECTION_POSTS);
 
   try {
-    const snapshot = await postsRef.orderBy("createdAt", "desc").get();
+    const snapshot = await postsRef.get();
 
     const posts = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -137,13 +145,35 @@ const getAllPosts = async (_req, res) => {
 
     res.status(200).json({
       status: 200,
-      posts,
       data,
     });
   } catch (error) {
     res.status(500).json({
       status: 500,
-      message: "Error al obtener posts",
+      message: "Error al obtener posts" + error.message,
+    });
+  }
+};
+
+const getComments = async (_req, res) => {
+  const postsRef = db.collection(process.env.COLLECTION_COMMENTS);
+
+  try {
+    const snapshot = await postsRef.orderBy("createdAt", "desc").get();
+
+    const comments = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.status(200).json({
+      status: 200,
+      comments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al obtener los comentarios",
       error,
     });
   }
@@ -152,7 +182,8 @@ const getAllPosts = async (_req, res) => {
 export default {
   getProfileById,
   updateProfileById,
-  createPost,
+  createComment,
   incrementLike,
-  getAllPosts,
+  getPosts,
+  getComments,
 };
