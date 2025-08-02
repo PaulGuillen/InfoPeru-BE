@@ -100,7 +100,8 @@ const createComment = async (req, res) => {
 };
 
 const incrementLike = async (req, res) => {
-  const { type, id } = req.params;
+  const { type, id, userId } = req.params;
+  const increment = req.params.increment === "true"; // 🔥 conversión explícita a Boolean
 
   const collectionName =
     type === "comment"
@@ -114,21 +115,38 @@ const incrementLike = async (req, res) => {
       const doc = await t.get(docRef);
       if (!doc.exists) throw new Error("Documento no encontrado");
 
-      const currentLikes = doc.data().likes || 0;
-      t.update(docRef, { likes: currentLikes + 1 });
+      const data = doc.data();
+      const currentLikes = data.likes || 0;
+      const likedBy = data.likedBy || {};
+
+      if (increment) {
+        // Es un like
+        likedBy[userId] = true;
+        t.update(docRef, {
+          likes: currentLikes + 1,
+          likedBy,
+        });
+      } else {
+        delete likedBy[userId];
+        t.update(docRef, {
+          likes: Math.max(currentLikes - 1, 0),
+          likedBy,
+        });
+      }
     });
 
     res.status(200).json({
       status: 200,
-      message: "Like agregado correctamente",
+      message: "Like actualizado correctamente",
     });
   } catch (error) {
     res.status(500).json({
       status: 500,
-      message: "Error al incrementar like" + error.message,
+      message: "Error al actualizar el like: " + error.message,
     });
   }
 };
+
 
 const getPosts = async (_req, res) => {
   const postsRef = db.collection(process.env.COLLECTION_POSTS);
