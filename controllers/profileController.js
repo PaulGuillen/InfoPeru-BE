@@ -101,7 +101,7 @@ const createComment = async (req, res) => {
 
 const incrementLike = async (req, res) => {
   const { type, id, userId } = req.params;
-  const increment = req.params.increment === "true"; // 🔥 conversión explícita a Boolean
+  const increment = req.params.increment === "true";
 
   const collectionName =
     type === "comment"
@@ -120,7 +120,6 @@ const incrementLike = async (req, res) => {
       const likedBy = data.likedBy || {};
 
       if (increment) {
-        // Es un like
         likedBy[userId] = true;
         t.update(docRef, {
           likes: currentLikes + 1,
@@ -173,26 +172,42 @@ const getPosts = async (_req, res) => {
   }
 };
 
-const getComments = async (_req, res) => {
+const getComments = async (req, res) => {
   const postsRef = db.collection(process.env.COLLECTION_COMMENTS);
 
+  const limit = parseInt(req.query.limit) || 10;
+  const lastTimestamp = req.query.lastTimestamp;
+
   try {
-    const snapshot = await postsRef.orderBy("createdAt", "desc").get();
+    let query = postsRef.orderBy("createdAt", "desc").limit(limit);
+
+    if (lastTimestamp) {
+      const ts = Timestamp.fromMillis(Number(lastTimestamp));
+      query = query.startAfter(ts);
+    }
+
+    const snapshot = await query.get();
 
     const comments = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
 
+    const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+    const nextPageCursor =
+      lastVisible?.data()?.createdAt?.toMillis?.() || null;
+
     res.status(200).json({
       status: 200,
       comments,
+      nextPageCursor,
     });
   } catch (error) {
+    console.error("Error al obtener comentarios paginados:", error);
     res.status(500).json({
       status: 500,
       message: "Error al obtener los comentarios",
-      error,
+      error: error.message,
     });
   }
 };
