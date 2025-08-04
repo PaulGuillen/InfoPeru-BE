@@ -14,10 +14,8 @@ const uploadEmergenciesStructured = async (_req, res) => {
 
     const serenazgoRef = db.collection("district").doc("serenazgo");
 
-    // Actualizar fecha
     await serenazgoRef.set({ updatedAt: new Date().toISOString() }, { merge: true });
 
-    // Crear batch para performance
     const batch = db.batch();
 
     const writeSubcollection = (collectionName, dataArray) => {
@@ -27,7 +25,6 @@ const uploadEmergenciesStructured = async (_req, res) => {
       });
     };
 
-    // Guardar cada subcolección
     writeSubcollection("general", general);
     writeSubcollection("civil_defense", civil_defense);
     writeSubcollection("lima", lima);
@@ -53,7 +50,6 @@ const getAllSerenazgoData = async (_req, res) => {
   try {
     const serenazgoRef = db.collection("district").doc("serenazgo");
 
-    // Obtener metadatos del doc principal
     const doc = await serenazgoRef.get();
     if (!doc.exists) {
       return res.status(404).json({
@@ -64,7 +60,6 @@ const getAllSerenazgoData = async (_req, res) => {
 
     const metadata = doc.data();
 
-    // Obtener subcolecciones
     const [generalSnap, civilSnap, limaSnap, provincesSnap] = await Promise.all([
       serenazgoRef.collection("general").get(),
       serenazgoRef.collection("civil_defense").get(),
