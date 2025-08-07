@@ -97,8 +97,81 @@ const getSection = async (req, res, sectionName) => {
   }
 };
 
+const addDistrictSection = async (req, res) => {
+  try {
+    const sections = req.body;
+
+    if (!Array.isArray(sections) || sections.length === 0) {
+      return res.status(400).json({
+        status: 400,
+        message: "El cuerpo debe ser un array de secciones.",
+      });
+    }
+
+    for (const section of sections) {
+      const { title, image, type } = section;
+      if (!title || !image || !type) {
+        return res.status(400).json({
+          status: 400,
+          message: "Cada sección debe tener title, image y type.",
+        });
+      }
+    }
+
+    const docRef = db.collection("district").doc("section");
+    await docRef.set({
+      data: sections,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return res.status(201).json({
+      status: 201,
+      message: `✅ ${sections.length} sección(es) guardadas correctamente en district/section.`,
+      data: sections,
+    });
+  } catch (error) {
+    console.error("❌ Error en addDistrictSection:", error);
+    return res.status(500).json({
+      status: 500,
+      message: "Error al guardar las secciones",
+      error: error.message,
+    });
+  }
+};
+
+const getDistrictSection = async (_req, res) => {
+  try {
+    const doc = await db.collection("district").doc("section").get();
+
+    if (!doc.exists) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontró la sección 'section'",
+      });
+    }
+
+    const docData = doc.data();
+    const sectionData = docData.data || [];
+
+    return res.status(200).json({
+      status: 200,
+      data: sectionData,
+    });
+  } catch (error) {
+    console.error("❌ Error en getDistrictSection:", error);
+    return res.status(500).json({
+      status: 500,
+      message: "Error al obtener las secciones",
+      error: error.message,
+    });
+  }
+};
+
+
 export default {
   uploadEmergenciesStructured,
+  addDistrictSection,
+  getDistrictSection,
   getGeneral: (req, res) => getSection(req, res, "general"),
   getCivilDefense: (req, res) => getSection(req, res, "civil_defense"),
   getLima: (req, res) => getSection(req, res, "lima"),

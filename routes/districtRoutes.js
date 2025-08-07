@@ -6,6 +6,9 @@ export default (app) => {
     DistrictController.uploadEmergenciesStructured
   );
 
+  app.post("/district/section", DistrictController.addDistrictSection)
+  app.get("/district/section", DistrictController.getDistrictSection)
+
   app.get("/districts/general", DistrictController.getGeneral);
   app.get("/districts/civil_defense", DistrictController.getCivilDefense);
 
@@ -17,4 +20,5 @@ export default (app) => {
 
   app.get("/districts/firefighters_lima", DistrictController.getFirefightersLima);
   app.get("/districts/firefighters_provinces", DistrictController.getFirefightersProvinces);
+
 };
